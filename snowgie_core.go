@@ -95,12 +95,12 @@ func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
 
 	s.runtime = runtime
 
-	if err := s.mq.Connect(s.config.amqpUrl) ; err != nil {
+	if err := s.mq.Connect(s.config.AmqpUrl) ; err != nil {
 		return err
 	}
 
 	//input queue
-	for _,q := range s.config.input {
+	for _,q := range s.config.Input {
 		consume , err := s.mq.Consume(q.QueueId , q.Queue)
 		if err != nil {
 			return err
@@ -112,7 +112,7 @@ func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
 	}
 
 	//output exchange
-	for _, e := range s.config.output {
+	for _, e := range s.config.Output {
 		done := make(chan bool)
 		errorExchange , err := s.mq.Publish(e.Exchange,e.ExchangeType)
 		if err != nil {

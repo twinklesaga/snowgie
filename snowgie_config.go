@@ -2,13 +2,13 @@ package snowgie
 
 
 type SnowgieConfig struct {
-	nodeType 	string			`json:"nodeType"`
-	amqpUrl 	string			`json:"amqpUrl"`
-	binPath		string			`json:"binPath"`
-	logPath		string 			`json:"logPath"`
+	NodeType 	string			`json:"nodeType"`
+	AmqpUrl 	string			`json:"amqpUrl"`
+	BinPath		string			`json:"binPath"`
+	LogPath		string 			`json:"logPath"`
 
-	input 		[]QueueInfo		`json:"input"`
-	output		[]ExchangeInfo	`json:"output"`
+	Input 		[]QueueInfo		`json:"input"`
+	Output		[]ExchangeInfo	`json:"output"`
 }
 
 
