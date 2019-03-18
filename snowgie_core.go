@@ -58,6 +58,7 @@ func NewSnowgie(cfgPath string , id string) (Snowgie , error){
 		return nil ,err
 	}
 
+
 	return &SnowgieCore{
 		id:id,
 		zk:nil,
@@ -89,6 +90,8 @@ type SnowgieCore struct {
 }
 
 func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
+	log.Println(s.config)
+
 	s.runtime = runtime
 
 	if err := s.mq.Connect(s.config.amqpUrl) ; err != nil {
