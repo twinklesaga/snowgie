@@ -53,7 +53,7 @@ func NewSnowgie(cfgPath string , id string) (Snowgie , error){
 	if err != nil {
 		return nil , err
 	}
-	log.Println(cfgPath, id ,cfg)
+	log.Println(cfgPath, id ,string(cfg))
 	var config SnowgieConfig
 	if err := json.Unmarshal(cfg , &config) ; err != nil {
 		return nil ,err
