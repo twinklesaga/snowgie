@@ -39,7 +39,7 @@ func NewSnowgieNode(zks []string , zkPath string , id string)  (Snowgie , error)
 		zk:zk,
 		zkPath:zkPath,
 		snowgiePath:snowgiePath,
-		config:&config,
+		config:config,
 		mq:module.NewRabbitMq(),
 		wg:new(sync.WaitGroup),
 		doneList: make([]chan bool , 0),
@@ -65,7 +65,7 @@ func NewSnowgie(cfgPath string , id string) (Snowgie , error){
 		zk:nil,
 		zkPath:"",
 		snowgiePath:"",
-		config:&config,
+		config:config,
 		mq:module.NewRabbitMq(),
 		wg:new(sync.WaitGroup),
 		doneList: make([]chan bool , 0),
@@ -79,7 +79,7 @@ type SnowgieCore struct {
 	zk			*module.Zookeeper
 	zkPath 		string
 	snowgiePath string
-	config		*SnowgieConfig
+	config		SnowgieConfig
 	mq 			*module.RabbitMq
 
 	runtime 	SnowgieRuntime
