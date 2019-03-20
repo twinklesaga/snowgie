@@ -88,10 +88,18 @@ type SnowgieCore struct {
 	doneList 	[]chan bool
 
 	exchangeMap map[string]chan<- amqp.Publishing
+
+	logger 		*module.RotateFileLogger
 }
 
 func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
 	log.Println(s.config)
+
+	logPath := path.Join(s.config.LogPath , s.config.NodeType )
+
+	s.logger = module.NewRotateLogger(logPath , s.id)
+	log.SetOutput(s.logger)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	s.runtime = runtime
 
@@ -185,6 +193,8 @@ func (s *SnowgieCore)shutdown() {
 
 		s.zk.Shutdown()
 	}
+
+	s.logger.Close()
 }
 
 
