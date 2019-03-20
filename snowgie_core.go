@@ -165,6 +165,10 @@ func (s *SnowgieCore) Run() error {
 	return nil
 }
 
+func (s *SnowgieCore)GetConfig() SnowgieConfig{
+	return s.config
+}
+
 func (s *SnowgieCore)shutdown() {
 
 	err := s.mq.Shutdown()
