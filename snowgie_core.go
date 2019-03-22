@@ -177,7 +177,13 @@ func (s *SnowgieCore)GetConfig() SnowgieConfig{
 	return s.config
 }
 
+func (s *SnowgieCore)GetResource(resId SGResourceId) (SnowgieResource , error){
+	panic("//")
+}
+
 func (s *SnowgieCore)shutdown() {
+
+	s.runtime.Shutdown()
 
 	err := s.mq.Shutdown()
 	if err != nil {
@@ -288,7 +294,7 @@ func (s *SnowgieCore)commandProcess(cmd []string) bool{
 				}
 			}
 		}else {
-			log.Printf("olaf COMMAND : Unknown %s\n" , c )
+			log.Printf("COMMAND : Unknown %s\n" , c )
 		}
 
 	}
