@@ -93,43 +93,46 @@ type SnowgieCore struct {
 }
 
 func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
-	log.Println(s.config)
+	err := runtime.Init(s)
+	if err == nil {
+		log.Println(s.config)
 
-	logPath := path.Join(s.config.LogPath , s.config.NodeType )
+		logPath := path.Join(s.config.LogPath, s.config.NodeType)
 
-	s.logger = module.NewRotateLogger(logPath , s.id)
-	log.SetOutput(s.logger)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+		s.logger = module.NewRotateLogger(logPath, s.id)
+		log.SetOutput(s.logger)
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	s.runtime = runtime
+		s.runtime = runtime
 
-	if err := s.mq.Connect(s.config.AmqpUrl) ; err != nil {
-		return err
-	}
-
-	//input queue
-	for _,q := range s.config.Input {
-		consume , err := s.mq.Consume(q.QueueId , q.Queue)
-		if err != nil {
+		if err := s.mq.Connect(s.config.AmqpUrl); err != nil {
 			return err
 		}
-		done := make(chan bool)
-		s.runConsume(q.QueueId , consume , done)
 
-		s.doneList = append(s.doneList , done)
-	}
+		//input queue
+		for _, q := range s.config.Input {
+			consume, err := s.mq.Consume(q.QueueId, q.Queue)
+			if err != nil {
+				return err
+			}
+			done := make(chan bool)
+			s.runConsume(q.QueueId, consume, done)
 
-	//output exchange
-	for _, e := range s.config.Output {
-		done := make(chan bool)
-		errorExchange , err := s.mq.Publish(e.Exchange,e.ExchangeType)
-		if err != nil {
-			return  err
+			s.doneList = append(s.doneList, done)
 		}
-		s.exchangeMap[e.ExchangeId] = s.runPublish(e.ExchangeId , errorExchange , done)
-		s.doneList = append(s.doneList , done)
+
+		//output exchange
+		for _, e := range s.config.Output {
+			done := make(chan bool)
+			errorExchange, err := s.mq.Publish(e.Exchange, e.ExchangeType)
+			if err != nil {
+				return err
+			}
+			s.exchangeMap[e.ExchangeId] = s.runPublish(e.ExchangeId, errorExchange, done)
+			s.doneList = append(s.doneList, done)
+		}
 	}
-	return runtime.Init(s)
+	return err
 }
 
 func (s *SnowgieCore) Run() error {
