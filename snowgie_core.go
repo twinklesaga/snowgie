@@ -194,6 +194,10 @@ func (s *SnowgieCore) Run() error {
 	return nil
 }
 
+func (s *SnowgieCore)GetNodeId() string {
+	return s.id
+}
+
 func (s *SnowgieCore)GetConfig() SnowgieConfig{
 	return s.config
 }
