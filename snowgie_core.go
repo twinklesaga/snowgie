@@ -93,45 +93,53 @@ type SnowgieCore struct {
 }
 
 func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
-	err := runtime.Init(s)
-	if err == nil {
-		log.Println(s.config)
+	var err error
+	err = s.lockPidFile()
+	if err != nil {
+		return err
+	}
+	err = runtime.Init(s)
+	if err != nil {
+		return err
+	}
 
-		logPath := path.Join(s.config.LogPath, s.config.NodeType)
+	log.Println(s.config)
 
-		s.logger = module.NewRotateLogger(logPath, s.id)
-		log.SetOutput(s.logger)
-		log.SetFlags(log.LstdFlags | log.Lshortfile)
+	logPath := path.Join(s.config.LogPath, s.config.NodeType)
 
-		s.runtime = runtime
+	s.logger = module.NewRotateLogger(logPath, s.id)
+	log.SetOutput(s.logger)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-		if err := s.mq.Connect(s.config.AmqpUrl); err != nil {
+	s.runtime = runtime
+
+	if err := s.mq.Connect(s.config.AmqpUrl); err != nil {
+		return err
+	}
+
+	//input queue
+	for _, q := range s.config.Input {
+		consume, err := s.mq.Consume(q.QueueId, q.Queue)
+		if err != nil {
 			return err
 		}
+		done := make(chan bool)
+		s.runConsume(q.QueueId, consume, done)
 
-		//input queue
-		for _, q := range s.config.Input {
-			consume, err := s.mq.Consume(q.QueueId, q.Queue)
-			if err != nil {
-				return err
-			}
-			done := make(chan bool)
-			s.runConsume(q.QueueId, consume, done)
-
-			s.doneList = append(s.doneList, done)
-		}
-
-		//output exchange
-		for _, e := range s.config.Output {
-			done := make(chan bool)
-			errorExchange, err := s.mq.Publish(e.Exchange, e.ExchangeType)
-			if err != nil {
-				return err
-			}
-			s.exchangeMap[e.ExchangeId] = s.runPublish(e.ExchangeId, errorExchange, done)
-			s.doneList = append(s.doneList, done)
-		}
+		s.doneList = append(s.doneList, done)
 	}
+
+	//output exchange
+	for _, e := range s.config.Output {
+		done := make(chan bool)
+		errorExchange, err := s.mq.Publish(e.Exchange, e.ExchangeType)
+		if err != nil {
+			return err
+		}
+		s.exchangeMap[e.ExchangeId] = s.runPublish(e.ExchangeId, errorExchange, done)
+		s.doneList = append(s.doneList, done)
+	}
+
 	return err
 }
 
@@ -304,3 +312,13 @@ func (s *SnowgieCore)commandProcess(cmd []string) bool{
 	return terminate
 }
 
+
+func (s *SnowgieCore)lockPidFile() error {
+
+	return nil
+}
+
+func (s *SnowgieCore)unlockPidFile() error {
+
+	return nil
+}

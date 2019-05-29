@@ -46,10 +46,10 @@ func FileSize(path string) int64 {
 	return fi.Size()
 }
 
-func DownloadFile( url string,filepath string) error {
+func DownloadFile( url string,filePath string) error {
 
 	// Create the file
-	out, err := os.Create(filepath)
+	out, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
