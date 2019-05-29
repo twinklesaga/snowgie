@@ -1,10 +1,12 @@
 package module
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/jlaffaye/ftp"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -171,3 +173,24 @@ func (f *FtpSession) List(dir string) ([]string , error){
 	return nil, ErrorFtpClientNil
 }
 
+func (f *FtpSession)Retr(src string , dest string) error{
+	destFile , err :=os.Create(dest)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	response , err := f.Client.Retr(src)
+	if err != nil {
+		return err
+	}
+	defer response.Close()
+	buf, err := ioutil.ReadAll(response)
+
+	w := bufio.NewWriter(destFile)
+	_, err = w.Write(buf)
+	if err != nil {
+		return err
+	}
+	return w.Flush()
+}
