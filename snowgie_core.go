@@ -198,6 +198,7 @@ func (s *SnowgieCore)GetResource(resId SGResourceId) (SnowgieResource , error){
 
 func (s *SnowgieCore)GetNodConfig(nodConfig interface{}) error{
 	if len(s.config.NodeConfigPath) > 0 {
+		log.Println("load node config")
 		data , err := ioutil.ReadFile(s.config.NodeConfigPath)
 
 		if err != nil{
@@ -211,6 +212,7 @@ func (s *SnowgieCore)GetNodConfig(nodConfig interface{}) error{
 	return nil
 }
 func (s *SnowgieCore)shutdown() {
+	log.Println("Shutdown start")
 
 	s.runtime.Shutdown()
 
@@ -228,8 +230,10 @@ func (s *SnowgieCore)shutdown() {
 
 		s.zk.Shutdown()
 	}
-
+	s.unlockPidFile()
+	log.Println("Shutdown End")
 	s.logger.Close()
+
 }
 
 
