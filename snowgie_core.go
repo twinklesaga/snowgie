@@ -97,15 +97,6 @@ type SnowgieCore struct {
 }
 
 func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
-	var err error
-	err = s.lockPidFile()
-	if err != nil {
-		return err
-	}
-	err = runtime.Init(s)
-	if err != nil {
-		return err
-	}
 
 	log.Println(s.config)
 
@@ -116,6 +107,17 @@ func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	s.runtime = runtime
+
+	var err error
+	err = s.lockPidFile()
+	if err != nil {
+		return err
+	}
+	err = runtime.Init(s)
+	if err != nil {
+		return err
+	}
+
 
 	if err := s.mq.Connect(s.config.AmqpUrl); err != nil {
 		return err
@@ -142,6 +144,10 @@ func (s *SnowgieCore) Init(runtime SnowgieRuntime) error {
 		}
 		s.exchangeMap[e.ExchangeId] = s.runPublish(e.ExchangeId, errorExchange, done)
 		s.doneList = append(s.doneList, done)
+	}
+
+	if err != nil {
+		s.shutdown()
 	}
 
 	return err
