@@ -20,6 +20,7 @@ type SnowgieResource interface {
 type SnowgieContext interface {
 	ProcessPublish(id string , body []byte , priority uint8) error
 	GetConfig() SnowgieConfig
+	GetNodConfig(nodConfig interface{}) error
 	GetResource(resId SGResourceId) (SnowgieResource , error)
 }
 

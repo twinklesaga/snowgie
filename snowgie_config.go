@@ -7,6 +7,7 @@ type SnowgieConfig struct {
 	BinPath		string			`json:"binPath"`
 	LogPath		string 			`json:"logPath"`
 	PidPath		string			`json:"pidPath"`
+	NodeConfigPath	string 		`json:"nodeConfigPath"`
 
 	Input 		[]QueueInfo		`json:"input"`
 	Output		[]ExchangeInfo	`json:"output"`

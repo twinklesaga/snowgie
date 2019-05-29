@@ -2,13 +2,17 @@ package snowgie
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/streadway/amqp"
 	"github.com/twinklesaga/snowgie/module"
+	"github.com/twinklesaga/snowgie/util"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -192,6 +196,20 @@ func (s *SnowgieCore)GetResource(resId SGResourceId) (SnowgieResource , error){
 	panic("//")
 }
 
+func (s *SnowgieCore)GetNodConfig(nodConfig interface{}) error{
+	if len(s.config.NodeConfigPath) > 0 {
+		data , err := ioutil.ReadFile(s.config.NodeConfigPath)
+
+		if err != nil{
+			return err
+		}
+		return json.Unmarshal(data, nodConfig)
+	}else {
+		return errors.New("cannot find nodeConfigPath property")
+	}
+
+	return nil
+}
 func (s *SnowgieCore)shutdown() {
 
 	s.runtime.Shutdown()
@@ -315,10 +333,48 @@ func (s *SnowgieCore)commandProcess(cmd []string) bool{
 
 func (s *SnowgieCore)lockPidFile() error {
 
+	if len(s.config.PidPath) > 0 {
+		pidFilePath := path.Join(s.config.PidPath ,s.config.NodeType, fmt.Sprintf("%s.pid" , s.id))
+
+		return MakePidFile(pidFilePath , s.id)
+	}
 	return nil
+}
+
+func MakePidFile(pidFile string , id string )error {
+	if util.Exists(pidFile) {
+		var err error
+		var pidData []byte
+		var pid int
+		pidData ,err = ioutil.ReadFile(pidFile)
+
+		if err == nil {
+			pid , err = strconv.Atoi(string(pidData))
+			if err == nil {
+				_ , err := os.FindProcess(pid)
+				if err == nil {
+					return errors.New(fmt.Sprintf("%s is already run : %d",id , pid))
+				}
+			}
+		}
+		return err
+	}else {
+		return ioutil.WriteFile(pidFile ,  []byte(fmt.Sprintf("%d", os.Getpid())), 0664)
+	}
 }
 
 func (s *SnowgieCore)unlockPidFile() error {
 
+	if len(s.config.PidPath) > 0 {
+		pidFilePath := path.Join(s.config.PidPath, s.config.NodeType, fmt.Sprintf("%s.pid", s.id))
+		RemovePidFile(pidFilePath)
+	}
 	return nil
+}
+
+func RemovePidFile(pidFile string) error{
+	if util.Exists(pidFile) {
+		return os.Remove(pidFile)
+	}
+	return errors.New("cannot find pid file")
 }
