@@ -155,12 +155,12 @@ func (f *FtpSession) CheckConnect() error {
 	}else {
 		_ , err := f.Client.CurrentDir()
 		if err != nil {
-			if err == io.EOF || strings.HasPrefix(err.Error(), "421") {
-				f.Close()
-				return f.Connect()
-			} else if err != nil {
+			if !( err == io.EOF || strings.HasPrefix(err.Error(), "421")) {
 				log.Println(err)
 			}
+
+			f.Close()
+			return f.Connect()
 		}
 		return err
 	}
