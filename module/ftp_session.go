@@ -48,6 +48,10 @@ func (f *FtpSession)Connect() error {
 	}
 
 	if err := f.Client.Login(f.User, f.Password); err != nil {
+		if strings.HasPrefix( err.Error() , "Permission denied.") {
+			log.Println(err)
+			err = nil
+		}
 		return err
 	}
 
